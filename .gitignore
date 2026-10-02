@@ -1,0 +1,5 @@
+# Ignores the folder containing the MNIST-dataset of approximately 60MBs.
+data/mnist-dataset/
+
+# Keeps to .gitkeep file to keep the folder structure in git
+!data/mnist-dataset/.gitkeep
