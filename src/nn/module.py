@@ -12,15 +12,14 @@ class Module:
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
-    @property
     def parameters(self) -> list[np.ndarray] | list[list[np.ndarray]]:
         all_params = []
 
         for param in self._parameters:
-            all_params.append(param)
+            all_params.extend(param)
 
         for module in self._modules:
-            if hasattr(module, "parameter"):
-                all_params.append(module.parameters)
+            if hasattr(module, "parameters"):
+                all_params.extend(module.parameters())
 
         return all_params
