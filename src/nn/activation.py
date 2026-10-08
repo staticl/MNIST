@@ -1,12 +1,12 @@
 import numpy as np
 
-from module import Module
+from .module import Module
 
 
 class ReLU(Module):
     def __init__(self) -> None:
         """
-        This class handles the initialization and the forward and backward pass of the ReLU activation function.
+        This class handles the initialization and the forward and backward pass of the ReLU activation function (non-linear layer).
 
         ReLU(x) = max(0, x)
 
