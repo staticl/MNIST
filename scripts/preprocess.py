@@ -6,10 +6,11 @@ This enables a faster training and the ability to handle processing independentl
 Run this script via: `python -m scripts.preprocess`
 """
 
-from data.preprocess import ImageProcessing
-
 import os
 from pathlib import Path
+
+from data.preprocess import ImageProcessing
+
 
 # path to the raw MNIST image dataset
 MNIST_FOLDER_PATH = os.path.join(Path.cwd(), Path(r"data\mnist-dataset"))

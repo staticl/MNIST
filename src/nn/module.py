@@ -4,6 +4,7 @@ import numpy as np
 class Module:
     def __init__(self) -> None:
         self._parameters = {}
+        self._gradients = {}
         self._modules = {}
 
     def forward(self, *args, **kwargs):
@@ -15,8 +16,8 @@ class Module:
     def parameters(self) -> list[np.ndarray] | list[list[np.ndarray]]:
         all_params = []
 
-        for param in self._parameters:
-            all_params.extend(param)
+        for name, param in self._parameters.items():
+            all_params.extend((param, self._gradients[name]))
 
         for module in self._modules:
             if hasattr(module, "parameters"):

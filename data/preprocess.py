@@ -20,10 +20,14 @@ class ImageProcessing:
             kaggleset_mnist_path (Path | str, optional): The path to the mnist-dataset as '.jpg'-format. Default here is: 'scolianni/mnistasjpg'.
 
         Raises:
-            ValueError: If the file at 'save_preprocess_path' already exists.
+            FileNotFoundError: If the target directory for the MNIST dataset doesn't exist.
+            FileExistsError: If the file at 'save_preprocess_path' already exists.
         """
+        if not os.path.exists(mnist_dataset_path):
+            raise FileNotFoundError(f"The target directory for the MNIST dataset doesn't exist. Path {mnist_dataset_path}")
+        
         if os.path.exists(save_preprocessed_path):
-            raise ValueError(f"The processed data already exists at: {save_preprocessed_path}. Please delete this file if the preprocessing should be redone.")
+            raise FileExistsError(f"The processed data already exists at: {save_preprocessed_path}. Please delete this file if the preprocessing should be redone.")
         self.save_preprocessed_path = save_preprocessed_path
 
         if not os.listdir(mnist_dataset_path):
@@ -45,8 +49,8 @@ class ImageProcessing:
         """
         self.rng = np.random.default_rng(seed)
 
-        image_tensors = []
-        digit_tensors = []
+        image_arr = []
+        digit_arr = []
 
         for digit in range(self.n_digits):
             digit_path = os.path.join(self.mnist_dataset_path, str(digit))
@@ -56,12 +60,12 @@ class ImageProcessing:
                 if augment:
                     img = self._augment(img)
                 img_tensor = self._convert_to_tensor(img)
-                image_tensors.append(img_tensor)
-                digit_tensors.append(digit)
+                image_arr.append(img_tensor)
+                digit_arr.append(digit)
 
         np.savez(file=self.save_preprocessed_path,
-                 image_tensors=np.stack(image_tensors), 
-                 digit_tensor=np.array(digit_tensors),
+                 feature_arr=np.stack(image_arr), 
+                 target_arr=np.array(digit_arr),
                  allow_pickle=True)
 
     def _augment(self, img: Image) -> Image:
@@ -69,7 +73,7 @@ class ImageProcessing:
         Rotates the image between [-20°, 20°].
 
         Args:
-            img: The image as a PIL.image object.
+            img (Image): The image as a PIL.image object.
         
         Returns:
             The augmented image with a rotation between [-20°, 20°].
@@ -82,7 +86,7 @@ class ImageProcessing:
         Converts the image to a numpy.ndarray and scales the pixels values to lie between [-1, 1].
 
         Args:
-            img: The image as a PIL.image object.
+            img (Image): The image as a PIL.image object.
         
         Returns:
             The image converted to a numpy.ndarray with pixel values scaled between [-1, 1].
