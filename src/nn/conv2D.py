@@ -28,31 +28,16 @@ class Conv2D(Module):
         self._gradients["W"] = np.zeros_like(self._parameters["W"], dtype=np.float32)
         self._gradients["b"] = np.zeros_like(self._parameters["b"], dtype=np.float32)
 
-    def set_parameters(self, W: np.ndarray, b: np.ndarray) -> None:
-        """
-        This function is used to set values the weight and bias to a specific value. This can be used when loading parameters from a previously trained model.
+        self.X = None
 
-        Args:
-            W (np.ndarray): weight matrix (shape = (num_filters, in_channels, kernel_width, kernel_width))
-            b (np.ndarray): bias vector (shape = (num_filters, 1, 1))
-        
-        Raises:
-            ValueError: If either the weight or bias has a different shape than it is supposed to.
-        """
-        if (self._parameters["W"].shape != W.shape) or (self._parameters["b"].shape != b.shape):
-            raise ValueError("Shape mismatch in either the weight matrix or the bias vector.")
-
-        self._parameters["W"] = W
-        self._parameters["b"] = b
-
-    def forward(self, X: np.ndarray) -> np.ndarray:
+    def forward(self, input: np.ndarray) -> np.ndarray:
         """
         This method calculates the forward pass of the 2D convolution layer.
 
-        y = X @ W + b
+        `y = X @ W + b`
 
         Args:
-            X (np.ndarray): The input feature matrix in the calculation (shape = (batch_size, height, width))
+            input (np.ndarray): The input feature matrix in the calculation (shape = (batch_size, in_channels, height, width)).
         
         Returns:
             The predicted logits of this layer y (shape = (batch_size, num_filters, height, width)).
@@ -60,7 +45,7 @@ class Conv2D(Module):
         Raises:
             ValueError: If there is a shape mismatch in X.
         """
-        batch_size, height, width = X.shape
+        _, _, height, width = input.shape
 
         if height != width: # this should never be the case for the images in the MNIST dataset
             raise ValueError(f"Shape Error in the input matrix X. {height} (height) != {width} (width)")
@@ -68,16 +53,47 @@ class Conv2D(Module):
         pad_width = self.kernel_width - 1
         self.left = int(pad_width / 2)
         self.right = int(pad_width / 2) + pad_width % 2
-        padding = ((0, 0), (self.left, self.right), (self.left, self.right))
+        padding = ((0, 0), (0, 0), (self.left, self.right), (self.left, self.right))
 
-        X_padded = np.pad(X, padding, mode='constant', constant_values=0)
+        X_padded = np.pad(input, padding, mode="constant", constant_values=0)
 
-        X_view = sliding_window_view(X_padded, window_shape=(self.kernel_width, self.kernel_width), axis=(1,2))
-        # X_view.shape = (batch_size, height, width, kernel_width, kernel_width)
+        self.X = sliding_window_view(X_padded, window_shape=(self.kernel_width, self.kernel_width), axis=(2,3))
+        # X.shape = (batch_size, height, width, kernel_width, kernel_width)
 
-        output = np.einsum('bhwkk,fckk->bfhw', X_view, self._parameters["W"], optimize=True) + self._parameters["b"]
+        output = np.einsum("bchwij,fcij->bfhw", self.X, self._parameters["W"], optimize=True) + self._parameters["b"]
 
         return output
 
-    def backward(self) -> np.ndarray:
-        pass
+    def backward(self, dout: np.ndarray) -> np.ndarray:
+        """
+        This method calculates the backward pass of 2D convolution layer.
+
+        It calculates the cotangent for this layer, `dX = dout @ W`, and the gradient of the bias and the weights
+
+        Args:
+            dout (np.ndarrray): The cotangent of the previous layers in the backward pass (shape = (batch_size, num_filters, height, width))
+        
+        Returns:
+            The cotangent of this layer dX (shape = (batch_size, height, width))
+        
+        Raises:
+            RunTimeError: If the forward pass wasn't called before hand.
+        """
+        if self.X is None:
+            raise RuntimeError(f"The forward pass hasn't been executed.")
+
+        dW = np.einsum("bfhw,bchwij->fcij", dout, self.X, optimize=True)
+        self._gradients["W"][:] = dW
+
+        db = np.sum(dout, axis=(0, 2, 3)).reshape(-1, 1, 1)
+        self._gradients["b"][:] = db
+
+        padding = ((0, 0), (0, 0), (self.right, self.left), (self.right, self.left)) # padding reversed to forward pass
+        dout_padded = np.pad(dout, padding, mode="constant", constant_values=0)
+        dout_view = sliding_window_view(dout_padded, window_shape=(self.kernel_width, self.kernel_width), axis=(2,3))
+
+        dX = np.einsum("bfhwij,fcij->bchw", dout_view, self._parameters["W"][:,:,::-1,::-1], optimize=True)
+
+        return dX
+
+

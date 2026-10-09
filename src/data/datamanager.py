@@ -22,7 +22,7 @@ class DataManager:
             raise FileExistsError(f"The file containing the preprocessed data doesn't exist. Path: {processed_path}")
         
         feature_arr, target_arr = np.load(processed_path)
-        # feature_arr.shape = (n_digits, height, width), target_arr.shape = (n_digits,)
+        # feature_arr.shape = (n_digits, in_channels, height, width), target_arr.shape = (n_digits, in_channels)
 
         self.feature_arr = feature_arr.astype(np.float32)
         self.target_arr = target_arr.astype(np.float32)

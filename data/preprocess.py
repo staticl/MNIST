@@ -62,10 +62,10 @@ class ImageProcessing:
                 img_tensor = self._convert_to_tensor(img)
                 image_arr.append(img_tensor)
                 digit_arr.append(digit)
-
+        
         np.savez(file=self.save_preprocessed_path,
                  feature_arr=np.stack(image_arr), 
-                 target_arr=np.array(digit_arr),
+                 target_arr=np.array(digit_arr).reshape(-1, 1),
                  allow_pickle=True)
 
     def _augment(self, img: Image) -> Image:
@@ -91,4 +91,6 @@ class ImageProcessing:
         Returns:
             The image converted to a numpy.ndarray with pixel values scaled between [-1, 1].
         """
-        return np.array(img) / 127.5 - 1
+        img_tensor = np.array(img) / 127.5 - 1
+        
+        return img_tensor.reshape(1, 28, 28)
