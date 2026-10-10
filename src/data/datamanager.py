@@ -21,8 +21,9 @@ class DataManager:
         if not os.path.exists(processed_path):
             raise FileExistsError(f"The file containing the preprocessed data doesn't exist. Path: {processed_path}")
         
-        feature_arr, target_arr = np.load(processed_path)
-        # feature_arr.shape = (n_digits, in_channels, height, width), target_arr.shape = (n_digits, in_channels)
+        processed_data = np.load(processed_path)
+        feature_arr = processed_data["feature_arr"] # feature_arr.shape = (n_digits, in_channels, height, width)
+        target_arr = processed_data["target_arr"] # target_arr.shape = (n_digits,)
 
         self.feature_arr = feature_arr.astype(np.float32)
         self.target_arr = target_arr.astype(np.float32)
@@ -48,13 +49,13 @@ class DataManager:
         if not (0.0 < train_ratio < 1.0):
             raise ValueError("The train ratio has to be in ]0, 1[.")
 
-        n_samples = len(self.dataset)
+        n_samples = len(self.feature_arr)
 
         train_split = int(n_samples * train_ratio)
         val_split = train_split + int(n_samples * train_ratio / 2)
 
         X_train, y_train = self.feature_arr[:train_split], self.target_arr[:train_split]
-        X_val, y_val = self.feature_arr[train_split:val_split], self.digit_target_arrtensor[train_split:val_split]
+        X_val, y_val = self.feature_arr[train_split:val_split], self.target_arr[train_split:val_split]
         X_test, y_test = self.feature_arr[val_split:], self.target_arr[train_split:val_split]
 
         train_loader = Dataloader(X_train, y_train, batch_size=self.batch_size, shuffle=True, seed=self.seed)

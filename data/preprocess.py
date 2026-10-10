@@ -65,7 +65,7 @@ class ImageProcessing:
         
         np.savez(file=self.save_preprocessed_path,
                  feature_arr=np.stack(image_arr), 
-                 target_arr=np.array(digit_arr).reshape(-1, 1),
+                 target_arr=np.array(digit_arr),
                  allow_pickle=True)
 
     def _augment(self, img: Image) -> Image:

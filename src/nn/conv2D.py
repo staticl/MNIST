@@ -11,8 +11,8 @@ class Conv2D(Module):
 
         Args:
             num_filters (int): The number of filters going of the data.
-            in_channels (int): The number of input channels (Is `1` for the first layer)
-            kernel_width: (=kernel_height) The width and height of the kernel sliding over the data
+            in_channels (int): The number of input channels (Is `1` for the first layer).
+            kernel_width (int): (=kernel_height) The width and height of the kernel sliding over the data.
             seed (int | None, optional): A random seed used for reproducibility. Default is `None`.
         """
         super().__init__()
@@ -37,7 +37,7 @@ class Conv2D(Module):
         `y = X @ W + b`
 
         Args:
-            input (np.ndarray): The input feature matrix in the calculation (shape = (batch_size, in_channels, height, width)).
+            input (np.ndarray): The input feature matrix for this layer (shape = (batch_size, in_channels, height, width)).
         
         Returns:
             The predicted logits of this layer y (shape = (batch_size, num_filters, height, width)).
@@ -66,21 +66,21 @@ class Conv2D(Module):
 
     def backward(self, dout: np.ndarray) -> np.ndarray:
         """
-        This method calculates the backward pass of 2D convolution layer.
+        This method calculates the backward pass of the 2D convolution layer.
 
-        It calculates the cotangent for this layer, `dX = dout @ W`, and the gradient of the bias and the weights
+        It calculates the cotangent for this layer, `dX = dout @ W`, and the gradient of the bias and the weights.
 
         Args:
-            dout (np.ndarrray): The cotangent of the previous layers in the backward pass (shape = (batch_size, num_filters, height, width))
+            dout (np.ndarrray): The cotangent of the previous layers in the backward pass (shape = (batch_size, num_filters, height, width)).
         
         Returns:
-            The cotangent of this layer dX (shape = (batch_size, height, width))
+            The cotangent of this layer dX (shape = (batch_size, in_channels, height, width)).
         
         Raises:
             RunTimeError: If the forward pass wasn't called before hand.
         """
         if self.X is None:
-            raise RuntimeError(f"The forward pass hasn't been executed.")
+            raise RuntimeError("The forward pass hasn't been executed prior.")
 
         dW = np.einsum("bfhw,bchwij->fcij", dout, self.X, optimize=True)
         self._gradients["W"][:] = dW

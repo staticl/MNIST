@@ -9,3 +9,6 @@ data/mnist-dataset/
 
 # Ignore the created .npz-file
 data/mnist_preprocessed.npz
+
+# Ignores the saved network
+mnistCNN_model.npz
