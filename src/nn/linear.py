@@ -20,7 +20,8 @@ class Linear(Module):
         self.out_channels = out_channels
         self.dims = dims
 
-        self._parameters["W"] = rng.normal(loc=0.0, scale=1.0, size=(self.out_channels * self.dims**2, n_classes)).astype(np.float32)
+        self._parameters["W"] = rng.normal(loc=0.0, scale=1.0, size=(
+            self.out_channels * self.dims**2, n_classes)).astype(np.float32)
         self._parameters["b"] = np.zeros(n_classes, dtype=np.float32)
 
         self._gradients["W"] = np.zeros_like(self._parameters["W"], dtype=np.float32)
@@ -36,10 +37,10 @@ class Linear(Module):
 
         Args:
             input (np.ndarray): The input feature matrix for this layer (shape = (batch_size, out_channels * height * width)).
-        
+
         Returns:
             The predicted logits of this layer y (shape = (batch_size, n_classes)).
-        
+
         Raises:
             ValueError: If there is a shape mismatch in X.
         """
@@ -57,7 +58,7 @@ class Linear(Module):
     def backward(self, dout: np.ndarray) -> np.ndarray:
         """
         This method calculates the backward pass of linear layer.
-        
+
         It calculates the cotangent for this layer, `dX = dout @ W.T`, and the gradient of the bias and the weights.
 
         Args:
@@ -65,7 +66,7 @@ class Linear(Module):
 
         Returns:
             The cotangent of this layer dX (shape = (batch_size, out_channels * height * width)).
-        
+
         Raises:
             RunTimeError: If the forward pass wasn't called before hand.
         """
@@ -81,4 +82,3 @@ class Linear(Module):
         dX = dout @ self._parameters["W"].T
 
         return dX.reshape(-1, self.out_channels, self.dims, self.dims)
-        

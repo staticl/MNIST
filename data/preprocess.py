@@ -24,20 +24,22 @@ class ImageProcessing:
             FileExistsError: If the file at 'save_preprocess_path' already exists.
         """
         if not os.path.exists(mnist_dataset_path):
-            raise FileNotFoundError(f"The target directory for the MNIST dataset doesn't exist. Path {mnist_dataset_path}")
-        
+            raise FileNotFoundError(
+                f"The target directory for the MNIST dataset doesn't exist. Path {mnist_dataset_path}")
+
         if os.path.exists(save_preprocessed_path):
-            raise FileExistsError(f"The processed data already exists at: {save_preprocessed_path}. Please delete this file if the preprocessing should be redone.")
+            raise FileExistsError(
+                f"The processed data already exists at: {save_preprocessed_path}. Please delete this file if the preprocessing should be redone.")
         self.save_preprocessed_path = save_preprocessed_path
 
-        if not os.listdir(mnist_dataset_path):
+        if len(os.listdir(mnist_dataset_path)) <= 1:
             cache = kagglehub.dataset_download(str(kaggleset_mnist_path))
             shutil.move(cache, mnist_dataset_path)
 
-        self.mnist_dataset_path = os.path.join(mnist_dataset_path, r"trainingSet", r"trainingSet")
+        self.mnist_dataset_path = os.path.join(mnist_dataset_path, Path(
+            r"1"), Path(r"trainingSet"), Path(r"trainingSet"))
 
         self.n_digits = len(os.listdir(self.mnist_dataset_path))
-
 
     def load(self, augment: bool = True, seed: int | None = None) -> None:
         """
@@ -62,9 +64,9 @@ class ImageProcessing:
                 img_tensor = self._convert_to_tensor(img)
                 image_arr.append(img_tensor)
                 digit_arr.append(digit)
-        
+
         np.savez(file=self.save_preprocessed_path,
-                 feature_arr=np.stack(image_arr), 
+                 feature_arr=np.stack(image_arr),
                  target_arr=np.array(digit_arr),
                  allow_pickle=True)
 
@@ -74,7 +76,7 @@ class ImageProcessing:
 
         Args:
             img (Image): The image as a PIL.image object.
-        
+
         Returns:
             The augmented image with a rotation between [-20°, 20°].
         """
@@ -87,10 +89,10 @@ class ImageProcessing:
 
         Args:
             img (Image): The image as a PIL.image object.
-        
+
         Returns:
             The image converted to a numpy.ndarray with pixel values scaled between [-1, 1].
         """
         img_tensor = np.array(img) / 127.5 - 1
-        
+
         return img_tensor.reshape(1, 28, 28)

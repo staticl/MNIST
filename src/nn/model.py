@@ -24,10 +24,10 @@ class MnistCNN(Module):
             num_filters, in_channels, kernel_width = conv_params
             self._modules[f"conv{i + 1}"] = Conv2D(num_filters, in_channels, kernel_width, seed=seed)
             self._modules[f"relu{i + 1}"] = ReLU()
-            
-        self._modules[f"linear1"] = Linear(out_channels=conv_params[-1][0])
 
-        self.net = Sequential(self._modules.values())
+        self._modules[f"linear1"] = Linear(out_channels=conv_layer_params[-1][0])
+
+        self.net = Sequential(list(self._modules.values()))
 
     def forward(self, input: np.ndarray) -> np.ndarray:
         """
@@ -35,7 +35,7 @@ class MnistCNN(Module):
 
         Args:
             input (np.ndarray): The input that is passed through the network.
-        
+
         Returns:
             The final output of the last layer of the network.
         """
@@ -44,10 +44,10 @@ class MnistCNN(Module):
     def backward(self, dout: np.ndarray) -> np.ndarray:
         """
         Passes the backward pass of the network to the sequential.
-        
+
         Args:
             dout (np.ndarray): The cotangent of the loss function.
-        
+
         Returns:
             The final cotangent of the last layer of the network.
         """
@@ -56,7 +56,7 @@ class MnistCNN(Module):
     def parameters(self) -> list[tuple[np.ndarray, np.ndarray]]:
         """
         Passes the parameter information of the network to the sequential and further to the module.
-        
+
         Returns:
             The parameters and gradients of the whole network.
         """

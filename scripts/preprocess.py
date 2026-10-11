@@ -13,14 +13,16 @@ from data.preprocess import ImageProcessing
 
 
 # path to the raw MNIST image dataset
-MNIST_FOLDER_PATH = os.path.join(Path.cwd(), Path(r"data\mnist-dataset"))
+MNIST_FOLDER_PATH = os.path.join(Path.cwd(), Path(r"data"), Path(r"mnist-dataset"))
 
 # path to the .npz file where the processed data arrays are saved
-MNIST_PREPROCESSED_PATH = os.path.join(Path.cwd(), Path(r"data\mnist_preprocessed.npz"))
+MNIST_PREPROCESSED_PATH = os.path.join(Path.cwd(), Path(r"data"), Path(r"mnist_preprocessed.npz"))
+
 
 def main() -> None:
     imgproc = ImageProcessing(MNIST_FOLDER_PATH, MNIST_PREPROCESSED_PATH)
     imgproc.load()
+
 
 if __name__ == "__main__":
     main()

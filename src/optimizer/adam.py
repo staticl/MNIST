@@ -14,7 +14,7 @@ class AdamW:
             eps (float, optional): A factor used to avoid division by zero.
         """
         self.parameters = parameters
-        
+
         self.m = [np.zeros_like(param, dtype=np.float32) for param, _ in parameters]
         self.v = [np.zeros_like(param, dtype=np.float32) for param, _ in parameters]
 
@@ -31,12 +31,11 @@ class AdamW:
         This method applies a single step to the optimizer (updates the parameters in place using the gradient).
         """
         self.t += 1
-        for param, grad in self.parameters:
-            self.m = self.beta1 * self.m + (1 - self.beta1) * grad
-            self.v = self.beta2 * self.v + (1 - self.beta2) * grad**2
+        for i, (param, grad) in enumerate(self.parameters):
+            self.m[i] = self.beta1 * self.m[i] + (1 - self.beta1) * grad
+            self.v[i] = self.beta2 * self.v[i] + (1 - self.beta2) * grad**2
 
-            m_hat = self.m / (1 - self.beta1**self.t)
-            v_hat = self.v / (1 - self.beta2**self.t)
+            m_hat = self.m[i] / (1 - self.beta1**self.t)
+            v_hat = self.v[i] / (1 - self.beta2**self.t)
 
             param -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
-

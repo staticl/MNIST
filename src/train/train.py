@@ -11,15 +11,15 @@ from src.data.dataloader import Dataloader
 from src.nn.model import MnistCNN
 from src.nn.loss import CrossEntropyWithLogitsLoss
 
-from optimizer.adam import AdamW
+from src.optimizer.adam import AdamW
 
 
 def cnn_init(processed_path: Path | str, conv_layer_params: list[tuple[np.ndarray, np.ndarray]], seed: int | None = None) -> dict:
     data_manager = DataManager(processed_path, seed=seed)
     train_loader, val_loader, _ = data_manager.get_loader()
-    
+
     seed = None if seed is None else seed + 1
-    
+
     model = MnistCNN(conv_layer_params, seed)
 
     crossEntropyWithLogitsLoss = CrossEntropyWithLogitsLoss()
@@ -28,20 +28,48 @@ def cnn_init(processed_path: Path | str, conv_layer_params: list[tuple[np.ndarra
 
     return dict(train_loader=train_loader, val_loader=val_loader, model=model, crossEntropyWithLogitsLoss=crossEntropyWithLogitsLoss, optimizer=optimizer)
 
-def evalute(val_loader: Dataloader, model: MnistCNN, lossfn: CrossEntropyWithLogitsLoss) -> list[tuple[str, float]]:
+
+def evalute(val_loader: Dataloader, model: MnistCNN, lossfn: CrossEntropyWithLogitsLoss, n_classes: int = 10, eps: float = 1e-8) -> list[tuple[str, float]]:
     metrics = []
-    
+
+    confusion_matrix = np.zeros((n_classes, n_classes), dtype=int)
+
     n_batches = len(val_loader)
+
     total_loss = 0.0
-    
+    total_accuracy = 0.0
+    total_precision = np.zeros(n_classes, dytpe=np.float32)
+    total_recall = np.zeros(n_classes, dytpe=np.float32)
+    total_f1 = np.zeros(n_classes, dytpe=np.float32)
+
     for X, y in val_loader:
         logits = model(X)
         total_loss += lossfn(logits, y)
 
         softmax = math_fn.softmax(logits)
 
+        preds = np.argmax(softmax, axis=1)
+
+        np.add.at(confusion_matrix, (y, preds), 1)
+
+        confusion_matrix = preds.reshape(-1, 1) @ y.reshape(1, -1)
+
+        total_accuracy += np.sum(tp) / (np.sum(confusion_matrix) + eps)
+
+        tp = np.diag(confusion_matrix)
+
+        precision = tp / (tp + np.sum(confusion_matrix, axis=0) + eps)
+        total_precision += precision
+
+        recall = tp / (tp + np.sum(confusion_matrix, axis=1) + eps)
+        total_recall += recall
+
+        total_f1 += 2 * precision * recall / (precision + recall + eps)
+
     metrics.append(("loss", total_loss / n_batches))
+    metrics.append(("accuracy", total_accuracy / n_batches))
+    metrics.append(("precision", np.mean(total_recall)))
+    metrics.append(("recall", np.mean(total_recall)))
+    metrics.append("f1", np.mean(total_f1))
 
     return metrics
-
-    

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from .dataloader import Dataloader
 
+
 class DataManager:
     def __init__(self, processed_path: Path | str, batch_size: int = 32, seed: int | None = None) -> None:
         """
@@ -14,19 +15,19 @@ class DataManager:
             processed_path (Path | str): The path to the .npz-file containing the processed data.
             batch_size (int, optional): The size of a single batch returned by the dataloader. Default is `32`.
             seed (int | None, optional): A random seed used for reproducibility. Default is `None`.
-        
+
         Raises:
             FileNotFoundError: If the file containing the processed data doesn't exist. 
-        """ 
+        """
         if not os.path.exists(processed_path):
             raise FileExistsError(f"The file containing the preprocessed data doesn't exist. Path: {processed_path}")
-        
+
         processed_data = np.load(processed_path)
-        feature_arr = processed_data["feature_arr"] # feature_arr.shape = (n_digits, in_channels, height, width)
-        target_arr = processed_data["target_arr"] # target_arr.shape = (n_digits,)
+        feature_arr = processed_data["feature_arr"]  # feature_arr.shape = (n_digits, in_channels, height, width)
+        target_arr = processed_data["target_arr"]  # target_arr.shape = (n_digits,)
 
         self.feature_arr = feature_arr.astype(np.float32)
-        self.target_arr = target_arr.astype(np.float32)
+        self.target_arr = target_arr.astype(int)
 
         self.batch_size = batch_size
 
@@ -42,7 +43,7 @@ class DataManager:
 
         Returns:
             A seperate 'Dataloader' object for each of the datasets.
-        
+
         Raises:
             ValueError: If train_ratio is less or equal to `1` or less or equal to `0`.
         """
@@ -63,9 +64,3 @@ class DataManager:
         test_loader = Dataloader(X_test, y_test, batch_size=self.batch_size)
 
         return train_loader, val_loader, test_loader
-
-
-        
-
-
-        
