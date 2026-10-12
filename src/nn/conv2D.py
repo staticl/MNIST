@@ -21,8 +21,9 @@ class Conv2D(Module):
         self.num_filters = num_filters
         self.in_channles = in_channels
         self.kernel_width = kernel_width
-        
-        self._parameters["W"] = rng.normal(loc=0, scale=1, size=(num_filters, in_channels, kernel_width, kernel_width)).astype(np.float32)
+
+        self._parameters["W"] = rng.normal(loc=0, scale=1, size=(
+            num_filters, in_channels, kernel_width, kernel_width)).astype(np.float32)
         self._parameters["b"] = np.zeros((num_filters, 1, 1), dtype=np.float32)
 
         self._gradients["W"] = np.zeros_like(self._parameters["W"], dtype=np.float32)
@@ -38,18 +39,18 @@ class Conv2D(Module):
 
         Args:
             input (np.ndarray): The input feature matrix for this layer (shape = (batch_size, in_channels, height, width)).
-        
+
         Returns:
             The predicted logits of this layer y (shape = (batch_size, num_filters, height, width)).
-        
+
         Raises:
             ValueError: If there is a shape mismatch in X.
         """
         _, _, height, width = input.shape
 
-        if height != width: # this should never be the case for the images in the MNIST dataset
+        if height != width:  # this should never be the case for the images in the MNIST dataset
             raise ValueError(f"Shape Error in the input matrix X. {height} (height) != {width} (width)")
-        
+
         pad_width = self.kernel_width - 1
         self.left = int(pad_width / 2)
         self.right = int(pad_width / 2) + pad_width % 2
@@ -57,7 +58,7 @@ class Conv2D(Module):
 
         X_padded = np.pad(input, padding, mode="constant", constant_values=0)
 
-        self.X = sliding_window_view(X_padded, window_shape=(self.kernel_width, self.kernel_width), axis=(2,3))
+        self.X = sliding_window_view(X_padded, window_shape=(self.kernel_width, self.kernel_width), axis=(2, 3))
         # X.shape = (batch_size, height, width, kernel_width, kernel_width)
 
         output = np.einsum("bchwij,fcij->bfhw", self.X, self._parameters["W"], optimize=True) + self._parameters["b"]
@@ -72,10 +73,10 @@ class Conv2D(Module):
 
         Args:
             dout (np.ndarrray): The cotangent of the previous layers in the backward pass (shape = (batch_size, num_filters, height, width)).
-        
+
         Returns:
             The cotangent of this layer dX (shape = (batch_size, in_channels, height, width)).
-        
+
         Raises:
             RunTimeError: If the forward pass wasn't called before hand.
         """
@@ -88,12 +89,10 @@ class Conv2D(Module):
         db = np.sum(dout, axis=(0, 2, 3)).reshape(-1, 1, 1)
         self._gradients["b"][:] = db
 
-        padding = ((0, 0), (0, 0), (self.right, self.left), (self.right, self.left)) # padding reversed to forward pass
+        padding = ((0, 0), (0, 0), (self.right, self.left), (self.right, self.left))  # padding reversed to forward pass
         dout_padded = np.pad(dout, padding, mode="constant", constant_values=0)
-        dout_view = sliding_window_view(dout_padded, window_shape=(self.kernel_width, self.kernel_width), axis=(2,3))
+        dout_view = sliding_window_view(dout_padded, window_shape=(self.kernel_width, self.kernel_width), axis=(2, 3))
 
-        dX = np.einsum("bfhwij,fcij->bchw", dout_view, self._parameters["W"][:,:,::-1,::-1], optimize=True)
+        dX = np.einsum("bfhwij,fcij->bchw", dout_view, self._parameters["W"][:, :, ::-1, ::-1], optimize=True)
 
         return dX
-
-

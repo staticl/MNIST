@@ -26,17 +26,17 @@ class Dataloader:
 
         start = int(surplus / 2)
         end = len(X) - (int(surplus / 2) + surplus % 2)
-        
+
         X_trimmed = X[start:end]
         y_trimmed = y[start:end]
 
         self.n_samples = len(X_trimmed)
         self.indices = np.arange(self.n_samples)
-        
+
         self.dataset = Dataset(X_trimmed, y_trimmed)
 
     def __len__(self) -> int:
-        return (self.n_samples / self.batch_size)
+        return int(self.n_samples / self.batch_size)
 
     def __iter__(self) -> Self:
         self.current_idx = 0
@@ -55,4 +55,4 @@ class Dataloader:
 
         self.current_idx += self.batch_size
 
-        return self.dataset[self.indices[start:end]]         
+        return self.dataset[self.indices[start:end]]

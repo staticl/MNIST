@@ -43,6 +43,8 @@ def main():
 
     n_batches = len(train_loader)
 
+    print(f"Total number of batches: {n_batches}")
+
     training_losses = []
     val_metrics = {
         "loss": [],
@@ -55,8 +57,10 @@ def main():
     for epoch in range(EPOCHS):
         print(f"Epoch {epoch + 1}/{EPOCHS}")
         total_loss = 0.0
+        i = 0
         for X, y in train_loader:
             logits = model(X)
+            i += 1
             total_loss += crossEntropyWithLogitsLoss(logits, y)
             dout = crossEntropyWithLogitsLoss.backward()
             model.backward(dout)

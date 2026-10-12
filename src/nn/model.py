@@ -52,12 +52,3 @@ class MnistCNN(Module):
             The final cotangent of the last layer of the network.
         """
         return self.net.backward(dout)
-
-    def parameters(self) -> list[tuple[np.ndarray, np.ndarray]]:
-        """
-        Passes the parameter information of the network to the sequential and further to the module.
-
-        Returns:
-            The parameters and gradients of the whole network.
-        """
-        return self.net.parameters()

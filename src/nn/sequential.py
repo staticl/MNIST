@@ -20,7 +20,7 @@ class Sequential(Module):
 
         Args:
             input (np.ndarray): The input that is passed through the network.
-        
+
         Returns:
             The final output of the last layer of the network.
         """
@@ -32,14 +32,14 @@ class Sequential(Module):
     def backward(self, dout: np.ndarray) -> np.ndarray:
         """
         This method passes the cotangent of the loss in reverse order through all layers of the network.
-        
+
         Args:
             dout (np.ndarray): The cotangent of the loss function.
-        
+
         Returns:
             The final cotangent of the last layer of the network.
         """
         for layer in self.layers[::-1]:
-            dout = layer.forward(dout)
+            dout = layer.backward(dout)
 
         return dout

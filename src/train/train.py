@@ -38,9 +38,9 @@ def evalute(val_loader: Dataloader, model: MnistCNN, lossfn: CrossEntropyWithLog
 
     total_loss = 0.0
     total_accuracy = 0.0
-    total_precision = np.zeros(n_classes, dytpe=np.float32)
-    total_recall = np.zeros(n_classes, dytpe=np.float32)
-    total_f1 = np.zeros(n_classes, dytpe=np.float32)
+    total_precision = np.zeros(32, dtype=np.float32)
+    total_recall = np.zeros(32, dtype=np.float32)
+    total_f1 = np.zeros(32, dtype=np.float32)
 
     for X, y in val_loader:
         logits = model(X)
@@ -54,9 +54,9 @@ def evalute(val_loader: Dataloader, model: MnistCNN, lossfn: CrossEntropyWithLog
 
         confusion_matrix = preds.reshape(-1, 1) @ y.reshape(1, -1)
 
-        total_accuracy += np.sum(tp) / (np.sum(confusion_matrix) + eps)
-
         tp = np.diag(confusion_matrix)
+
+        total_accuracy += np.sum(tp) / (np.sum(confusion_matrix) + eps)
 
         precision = tp / (tp + np.sum(confusion_matrix, axis=0) + eps)
         total_precision += precision
@@ -70,6 +70,6 @@ def evalute(val_loader: Dataloader, model: MnistCNN, lossfn: CrossEntropyWithLog
     metrics.append(("accuracy", total_accuracy / n_batches))
     metrics.append(("precision", np.mean(total_recall)))
     metrics.append(("recall", np.mean(total_recall)))
-    metrics.append("f1", np.mean(total_f1))
+    metrics.append(("f1", np.mean(total_f1)))
 
     return metrics

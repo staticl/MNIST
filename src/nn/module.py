@@ -23,7 +23,7 @@ class Module:
         """
         return self.forward(*args, **kwargs)
 
-    def parameters(self) -> list[np.ndarray] | list[list[np.ndarray]]:
+    def parameters(self) -> list[tuple[np.ndarray, np.ndarray]]:
         """
         Returns:
             A list of all the parameters either of the layer or the whole network.
@@ -31,9 +31,9 @@ class Module:
         all_params = []
 
         for name, param in self._parameters.items():
-            all_params.extend((param, self._gradients[name]))
+            all_params.append((param, self._gradients[name]))
 
-        for module in self._modules:
+        for module in self._modules.values():
             if hasattr(module, "parameters"):
                 all_params.extend(module.parameters())
 
