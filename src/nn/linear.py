@@ -10,8 +10,8 @@ class Linear(Module):
 
         Args:
             out_channels (int): The number of filters going of the data.
-            dims (int, optional): The height and width of the images in the MNIST dataset. Default is `28`.
-            n_classes (int, optional): The number of different digits inside the MNISt dataset. Default is `10`.
+            dims (int, optional): The height and width of the images in the MNIST dataset. Default is `28` (used when no pooling is applied).
+            n_classes (int, optional): The number of different digits inside the MNISt dataset. Default is `10` for MNIST.
             seed (int | None, optional): A random seed used for reproducibility. Default is `None`.
         """
         super().__init__()
@@ -20,7 +20,7 @@ class Linear(Module):
         self.out_channels = out_channels
         self.dims = dims
 
-        self._parameters["W"] = rng.normal(loc=0.0, scale=1.0, size=(
+        self._parameters["W"] = rng.normal(loc=0.0, scale=np.sqrt(2 / (out_channels * dims**2)), size=(
             self.out_channels * self.dims**2, n_classes)).astype(np.float32)
         self._parameters["b"] = np.zeros(n_classes, dtype=np.float32)
 

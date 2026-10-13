@@ -5,16 +5,19 @@ from .sequential import Sequential
 
 from .conv2D import Conv2D
 from .activation import ReLU
+from .maxpool import MaxPool
 from .linear import Linear
 
 
 class MnistCNN(Module):
-    def __init__(self, conv_layer_params: list[tuple[int, int, int]], seed: int | None = None) -> None:
+    def __init__(self, conv_layer_params: list[tuple[int, int, int]], img_size: int = 28, pool_kernel_size: int = 2, seed: int | None = None) -> None:
         """
         This class creates the blueprint of the CNN by initializing every layer in the network.
 
         Args:
             conv_layer_params (list[tuple[int, int, int]]): The parameters for each convolution layer in the network (num_filters, in_channels, kernel_width(=kernel_height))
+            img_size (int, optional): The size (=height=width) of an image in the MNIST dataset. Default is `28`.
+            pool_kernel_size (int, optional): The size of the kernel used in the max pooling layer. Dafualt is `2`.
             seed (int | None, optional): A random seed used for reproducibility. Default is `None`.
         """
         super().__init__()
@@ -24,8 +27,11 @@ class MnistCNN(Module):
             num_filters, in_channels, kernel_width = conv_params
             self._modules[f"conv{i + 1}"] = Conv2D(num_filters, in_channels, kernel_width, seed=seed)
             self._modules[f"relu{i + 1}"] = ReLU()
+            if i < len(conv_layer_params) - 1:
+                self._modules[f"maxpool{i + 1}"] = MaxPool(kernel_size=pool_kernel_size)
 
-        self._modules[f"linear1"] = Linear(out_channels=conv_layer_params[-1][0])
+        dims = int(img_size / (pool_kernel_size**(len(conv_layer_params) - 1)))
+        self._modules[f"linear1"] = Linear(out_channels=conv_layer_params[-1][0], dims=dims)
 
         self.net = Sequential(list(self._modules.values()))
 

@@ -27,12 +27,12 @@ crossEntropyWithLogitsLoss = CrossEntropyWithLogitsLoss()
 
 def test_loss_forward() -> None:
     loss = crossEntropyWithLogitsLoss(logits, targets)
-    print(f"loss = {loss}")
+    assert loss >= 0
 
 
 def test_loss_backward() -> None:
     out = crossEntropyWithLogitsLoss.backward()
-    print(f"out.shape = {out.shape}, max(out) = {np.max(out)}, min(out) = {np.min(out)}")
+    assert out.shape == (32, 10)
 
 
 if __name__ == "__main__":

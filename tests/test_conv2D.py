@@ -23,11 +23,11 @@ conv_layer = Conv2D(16, 1, 5, seed=SEED + 1) # num_filters=16, input_channels=1,
 
 def test_conv2D_forward() -> None:
     out = conv_layer.forward(X)
-    print(f"out.shape = {out.shape}, max(out) = {np.max(out)}, min(out) = {np.min(out)}")
+    assert out.shape == (32, 16, 28, 28)
 
 def test_conv2D_backward() -> None:
     out = conv_layer.backward(dout)
-    print(f"out.shape = {out.shape}, max(out) = {np.max(out)}, min(out) = {np.min(out)}")
+    assert out.shape == (32, 1, 28, 28)
 
 if __name__ == "__main__":
     test_conv2D_forward()

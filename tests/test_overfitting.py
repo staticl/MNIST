@@ -10,6 +10,8 @@ import numpy as np
 import os
 from pathlib import Path
 
+import time
+
 from src.train.train import evalute, cnn_init
 from src.train.plot import plot_training_loss, plot_val_metrics
 
@@ -51,7 +53,6 @@ def test_overfitting():
 
     losses = []
     for epoch in range(EPOCHS):
-        print(f"Epoch {epoch + 1}/{EPOCHS}")
         logits = model(X_overfit)
         loss = crossEntropyWithLogitsLoss(logits, y_overfit)
         losses.append(loss)
@@ -63,9 +64,9 @@ def test_overfitting():
             for metric, value in metrics:
                 val_metrics[metric].append(value)
 
-    plot_training_loss(losses)
-    plot_val_metrics(val_metrics, per_n_epochs=100)
-
+    # plot_training_loss(losses)
+    # plot_val_metrics(val_metrics, per_n_epochs=100)
+    assert losses[-1] < 1e-2
 
 if __name__ == "__main__":
     test_overfitting()

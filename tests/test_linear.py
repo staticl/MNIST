@@ -26,11 +26,11 @@ lin_layer = Linear(16, seed=SEED + 1) # num_filters=16, input_channels=1, kernel
 
 def test_linear_forward() -> None:
     out = lin_layer.forward(input)
-    print(f"out.shape = {out.shape}, max(out) = {np.max(out)}, min(out) = {np.min(out)}")
+    assert out.shape == (32, 10)
 
 def test_linear_backward() -> None:
     out = lin_layer.backward(dout)
-    print(f"out.shape = {out.shape}, max(out) = {np.max(out)}, min(out) = {np.min(out)}")
+    assert out.shape == (32, 16, 28, 28)
 
 if __name__ == "__main__":
     test_linear_forward()

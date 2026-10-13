@@ -80,7 +80,7 @@ class ImageProcessing:
         Returns:
             The augmented image with a rotation between [-20°, 20°].
         """
-        angle = int(self.rng.normal(loc=0.0, scale=1.0) * 20)
+        angle = int((self.rng.random() - 0.5) * 40)
         return img.rotate(angle)
 
     def _convert_to_tensor(self, img: Image) -> np.ndarray:

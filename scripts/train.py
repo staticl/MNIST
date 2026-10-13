@@ -1,3 +1,12 @@
+"""
+This script is utilzed to execute training loop of the model.
+
+If a pretrained model is present in a`mnistCNN_model.npz` it's automatically loaded.
+
+Run this script via: `python -m scripts.train`
+"""
+
+
 import numpy as np
 
 import os
@@ -7,17 +16,18 @@ from src.train.train import evalute, cnn_init
 from src.train.plot import plot_training_loss, plot_val_metrics
 
 
-PROCESSED_PATH = os.path.join(Path(r"data"), Path(r"mnist_preprocessed.npz"))
+PROCESSED_PATH = os.path.join(Path(r"data"), Path(r"mnist_preprocessed.npz")) # path to the preprocessed data
 
-SEED = 101
+SEED = 101 # seed used for reproducibility
 
-EPOCHS = 1
+EPOCHS = 32 # number of training epochs
 
-CONV_LAYER_PARAMS = [(16, 1, 6), (32, 16, 8), (64, 32, 10)]
+CONV_LAYER_PARAMS = [(16, 1, 3), (32, 16, 3), (64, 32, 3)] # parameters for every convolution layer (num_filters, in_channels, kernel_width), in_channels[i] = num_filters[i - 1]
 
-MODEL = Path("mnistCNN_model.npz")
-SAVE = True
+MODEL = Path("mnistCNN_model.npz") # path to where the model gets saved
+SAVE = True # boolean deciding if the model gets saved
 
+VALIDATION_PER_EPOCHS = 4 # number of epochs when the validation set gets evaluated
 
 def main():
     cnn_componentes = cnn_init(PROCESSED_PATH, CONV_LAYER_PARAMS, seed=SEED)
@@ -57,23 +67,21 @@ def main():
     for epoch in range(EPOCHS):
         print(f"Epoch {epoch + 1}/{EPOCHS}")
         total_loss = 0.0
-        i = 0
         for X, y in train_loader:
             logits = model(X)
-            i += 1
             total_loss += crossEntropyWithLogitsLoss(logits, y)
             dout = crossEntropyWithLogitsLoss.backward()
             model.backward(dout)
             optimizer.step()
         training_losses.append(total_loss / n_batches)
 
-        if not ((epoch + 1) % 5):
+        if not ((epoch + 1) % VALIDATION_PER_EPOCHS):
             metrics = evalute(val_loader, model, crossEntropyWithLogitsLoss)
             for metric, value in metrics:
                 val_metrics[metric].append(value)
 
     plot_training_loss(training_losses)
-    plot_val_metrics(val_metrics)
+    plot_val_metrics(val_metrics, per_n_epochs=VALIDATION_PER_EPOCHS)
 
     if SAVE:
         parameters = []

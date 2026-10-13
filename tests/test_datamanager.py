@@ -35,8 +35,7 @@ def test_dataloader() -> None:
         if X_batch.shape != X_shape or y_batch.shape != y_shape:
             raise ValueError(f"There is a shape mismatch in either X or y: X_batch.shape = {X_batch.shape}, y_batch.shape = {y_batch.shape}")
 
-    print(f"X_batch.shape = {X_shape}, y_batch.shape = {y_shape}")
-    # X_batch.shape = (batch_size, in_channels, height, width), y_batch.shape = (batch_size, in_channels)
+    assert X_batch.shape == (32, 1, 28, 28) and y_batch.shape == (32,)
 
 if __name__ == "__main__":
     test_dataloader()

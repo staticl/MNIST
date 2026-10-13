@@ -19,10 +19,10 @@ class Conv2D(Module):
         rng = np.random.default_rng(seed)
 
         self.num_filters = num_filters
-        self.in_channles = in_channels
+        self.in_channels = in_channels
         self.kernel_width = kernel_width
 
-        self._parameters["W"] = rng.normal(loc=0, scale=1, size=(
+        self._parameters["W"] = rng.normal(loc=0, scale=np.sqrt(2 / (in_channels * kernel_width**2)), size=(
             num_filters, in_channels, kernel_width, kernel_width)).astype(np.float32)
         self._parameters["b"] = np.zeros((num_filters, 1, 1), dtype=np.float32)
 

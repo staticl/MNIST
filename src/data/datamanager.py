@@ -53,11 +53,20 @@ class DataManager:
         n_samples = len(self.feature_arr)
 
         train_split = int(n_samples * train_ratio)
-        val_split = train_split + int(n_samples * train_ratio / 2)
+        val_split = train_split + int(n_samples * (1 - train_ratio) / 2)
 
-        X_train, y_train = self.feature_arr[:train_split], self.target_arr[:train_split]
-        X_val, y_val = self.feature_arr[train_split:val_split], self.target_arr[train_split:val_split]
-        X_test, y_test = self.feature_arr[val_split:], self.target_arr[train_split:val_split]
+        rng = np.random.default_rng(self.seed)
+        indices = np.arange(len(self.feature_arr))
+        rng.shuffle(indices)
+
+        feature_arr = self.feature_arr[indices]
+        target_arr = self.target_arr[indices]
+
+        X_train, y_train = feature_arr[:train_split], target_arr[:train_split]
+        X_val, y_val = feature_arr[train_split:val_split], target_arr[train_split:val_split]
+        X_test, y_test = feature_arr[val_split:], target_arr[val_split:]
+
+        self.seed = None if self.seed is None else self.seed + 1
 
         train_loader = Dataloader(X_train, y_train, batch_size=self.batch_size, shuffle=True, seed=self.seed)
         val_loader = Dataloader(X_val, y_val, batch_size=self.batch_size)
