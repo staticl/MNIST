@@ -47,7 +47,7 @@ The 42,000 labeled images of the Kaggle dataset were split randomly into train/v
 
 ### Requirements
 
-- Python >= 3.9
+- Python >= 3.11
 
 ```bash
 git clone https://github.com/staticl/MNIST

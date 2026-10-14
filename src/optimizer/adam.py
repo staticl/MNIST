@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class AdamW:
+class Adam:
     def __init__(self, parameters: list[tuple[np.ndarray, np.ndarray]], lr: float = 3e-4, beta1: float = 0.9, beta2: float = 0.999, eps: float = 1e-8) -> None:
         """
         This class implements the Adam optimizer. The optimizer uses SGD with momentum and an adaptive learning rate.

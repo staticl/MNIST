@@ -30,8 +30,9 @@ class MnistCNN(Module):
             if i < len(conv_layer_params) - 1:
                 self._modules[f"maxpool{i + 1}"] = MaxPool(kernel_size=pool_kernel_size)
 
+        seed = None if seed is None else seed + 1
         dims = int(img_size / (pool_kernel_size**(len(conv_layer_params) - 1)))
-        self._modules[f"linear1"] = Linear(out_channels=conv_layer_params[-1][0], dims=dims)
+        self._modules[f"linear1"] = Linear(out_channels=conv_layer_params[-1][0], dims=dims, seed=seed)
 
         self.net = Sequential(list(self._modules.values()))
 

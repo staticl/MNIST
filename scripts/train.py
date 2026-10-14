@@ -16,18 +16,20 @@ from src.train.train import evalute, cnn_init
 from src.train.plot import plot_training_loss, plot_val_metrics
 
 
-PROCESSED_PATH = os.path.join(Path(r"data"), Path(r"mnist_preprocessed.npz")) # path to the preprocessed data
+PROCESSED_PATH = os.path.join(Path(r"data"), Path(r"mnist_preprocessed.npz"))  # path to the preprocessed data
 
-SEED = 101 # seed used for reproducibility
+SEED = 101  # seed used for reproducibility
 
-EPOCHS = 32 # number of training epochs
+EPOCHS = 16  # number of training epochs
 
-CONV_LAYER_PARAMS = [(16, 1, 3), (32, 16, 3), (64, 32, 3)] # parameters for every convolution layer (num_filters, in_channels, kernel_width), in_channels[i] = num_filters[i - 1]
+# parameters for every convolution layer (num_filters, in_channels, kernel_width), in_channels[i] = num_filters[i - 1]
+CONV_LAYER_PARAMS = [(16, 1, 3), (32, 16, 3), (64, 32, 3)]
 
-MODEL = Path("mnistCNN_model.npz") # path to where the model gets saved
-SAVE = True # boolean deciding if the model gets saved
+MODEL = Path("mnistCNN_model.npz")  # path to where the model gets saved
+SAVE = True  # boolean deciding if the model gets saved
 
-VALIDATION_PER_EPOCHS = 4 # number of epochs when the validation set gets evaluated
+VALIDATION_PER_EPOCHS = 4  # number of epochs when the validation set gets evaluated
+
 
 def main():
     cnn_componentes = cnn_init(PROCESSED_PATH, CONV_LAYER_PARAMS, seed=SEED)

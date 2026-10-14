@@ -7,7 +7,7 @@ name = "numpy-cnn-mnist"
 version = "0.1.0"
 description = "A convolutional neural network for MNIST built from scratch in NumPy."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 authors = [{ name = "Louis Bösenberg" }]
 keywords = ["numpy", "cnn", "mnist", "deep-learning", "from-scratch"]
 dependencies = [

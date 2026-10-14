@@ -22,7 +22,7 @@ def cnn_init(processed_path: Path | str, conv_layer_params: list[tuple[int, int,
         processed_path (Path | str): The path to the .npz-file containing the processed data.
         conv_layer_params (list[tuple[int, int, int]]): The parameters for each convolution layer in the network (num_filters, in_channels, kernel_width(=kernel_height))
         seed (int | None, optional): A random seed used for reproducibility. Default is `None`.
-    
+
     Returns:
         A dictonary containing all the important module instances and the dataloader for all sets.
     """
@@ -50,7 +50,7 @@ def evalute(val_loader: Dataloader, model: MnistCNN, lossfn: CrossEntropyWithLog
         lossfn (CrossEntropyWithLogitsLoss): The loss function used in this model.
         n_classes (int, optional): The number of different classes contained in the truth labels. Default is `10` for MNIST.
         eps (float, optional): A factor used to avoid division by zero. 
-    
+
     Returns:
         A list of tuples containg the name of metric and its value.
     """
@@ -61,10 +61,6 @@ def evalute(val_loader: Dataloader, model: MnistCNN, lossfn: CrossEntropyWithLog
     n_batches = len(val_loader)
 
     total_loss = 0.0
-    total_accuracy = 0.0
-    total_precision = np.zeros(n_classes, dtype=np.float32)
-    total_recall = np.zeros(n_classes, dtype=np.float32)
-    total_f1 = np.zeros(n_classes, dtype=np.float32)
 
     for X, y in val_loader:
         logits = model(X)
@@ -76,22 +72,22 @@ def evalute(val_loader: Dataloader, model: MnistCNN, lossfn: CrossEntropyWithLog
 
         np.add.at(confusion_matrix, (y, preds), 1)
 
-        tp = np.diag(confusion_matrix)
+    tp = np.diag(confusion_matrix)
 
-        total_accuracy += np.sum(tp) / (np.sum(confusion_matrix) + eps)
+    total_accuracy += np.sum(tp) / (np.sum(confusion_matrix) + eps)
 
-        precision = tp / (np.sum(confusion_matrix, axis=0) + eps)
-        total_precision += precision
+    precision = tp / (np.sum(confusion_matrix, axis=0) + eps)
+    total_precision += precision
 
-        recall = tp / (np.sum(confusion_matrix, axis=1) + eps)
-        total_recall += recall
+    recall = tp / (np.sum(confusion_matrix, axis=1) + eps)
+    total_recall += recall
 
-        total_f1 += 2 * precision * recall / (precision + recall + eps)
+    total_f1 += 2 * precision * recall / (precision + recall + eps)
 
     metrics.append(("loss", total_loss / n_batches))
     metrics.append(("accuracy", total_accuracy / n_batches))
-    metrics.append(("precision", np.mean(total_precision)))
-    metrics.append(("recall", np.mean(total_recall)))
-    metrics.append(("f1", np.mean(total_f1)))
+    metrics.append(("precision", np.mean(total_precision) / n_batches))
+    metrics.append(("recall", np.mean(total_recall)) / n_batches)
+    metrics.append(("f1", np.mean(total_f1)) / n_batches)
 
     return metrics

@@ -26,22 +26,26 @@ class MaxPool(Module):
         Returns:
             The reduced input matrix by the kernel size (shape = (batch_size, num_filters, height // kernel_size, width // kernel_size)).
         """
-        self.input_shape = input.shape
-        batch_size, num_filters, height, width = self.input_shape
+        batch_size, num_filters, height, width = input.shape
 
         pad_h_total = height % self.kernel_size
-        pad_h = (int(pad_h_total / self.kernel_size), int(pad_h_total / self.kernel_size) + pad_h_total % self.kernel_size)
+        self.pad_h = (int(pad_h_total / self.kernel_size), int(pad_h_total /
+                                                               self.kernel_size) + pad_h_total % self.kernel_size)
         pad_w_total = width % self.kernel_size
-        pad_w = (int(pad_w_total / self.kernel_size), int(pad_w_total / self.kernel_size) + pad_w_total % self.kernel_size)
+        self.pad_w = (int(pad_w_total / self.kernel_size), int(pad_w_total /
+                                                               self.kernel_size) + pad_w_total % self.kernel_size)
 
-        input_padded = np.pad(input, 
-                              ((0, 0), (0, 0), pad_h, pad_w),
-                              mode='constant', constant_values=0)
+        input_padded = np.pad(input,
+                              ((0, 0), (0, 0), self.pad_h, self.pad_w),
+                              mode='constant', constant_values=-np.inf)
+        self.padded_shape = input_padded.shape
+
         padded_h, padded_w = input_padded.shape[2], input_padded.shape[3]
-        
-        input_r = input_padded.reshape(batch_size, num_filters, padded_h // self.kernel_size, self.kernel_size, padded_w // self.kernel_size, self.kernel_size) 
 
-        output = np.max(input_r, axis=(3,5))
+        input_r = input_padded.reshape(batch_size, num_filters, padded_h // self.kernel_size,
+                                       self.kernel_size, padded_w // self.kernel_size, self.kernel_size)
+
+        output = np.max(input_r, axis=(3, 5))
 
         self.mask = (input_r == output[:, :, :, np.newaxis, :, np.newaxis])
 
@@ -64,4 +68,10 @@ class MaxPool(Module):
         if self.mask is None:
             raise RuntimeError("The forward pass hasn't been executed prior.")
 
-        return (self.mask * dout[:, :, :, np.newaxis, :, np.newaxis]).reshape(self.input_shape)
+        dX_padded = (self.mask * dout[:, :, :, np.newaxis, :, np.newaxis]).reshape(self.padded_shape)
+
+        ph, pw = self.padded_shape[2:]
+
+        dX = dX_padded[:, :, self.pad_h[0]:ph - self.pad_h[1], self.pad_w[0]:pw - self.pad_w[1]]
+
+        return dX
